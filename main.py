@@ -1,35 +1,31 @@
-# argparse library provides command line interface (CLI)
-import argparse
-
+from cmd import Cmd
 import sys
-import os
+
+floatChange = 0.0
 
 
-# dictionary (hash table to store change)
+class CmdSubclass(Cmd):
+
+    def do_init(self, arg):
+        """ Command to initialise"""
+        global floatChange
+        floatChange = float(arg)
+
+    def do_printfloat(*args):
+        """Help text for export"""
+        print(floatChange)
+
+    def do_exit(*args):
+        return -1
+
+
+if __name__ == '__main__':
+    c = CmdSubclass()
+    command = ' '.join(sys.argv[1:])
+    if command:
+        sys.exit(c.onecmd(command))
+    c.cmdloop()
 
 
 
-# API functions
-def init_vending_machine():
-    if len(sys.argv) < 3:
-        print(InitVendParser.print_usage())
 
-# Create Parser
-parser = argparse.ArgumentParser(prog='vend',
-                                 description='operate Vending Machine',
-                                 )
-
-# add subparsers for sub commands
-subparsers = parser.add_subparsers()
-
-InitVendParser = subparsers.add_parser('init',
-                                       help='initialise vending machine with float value',
-                                       usage='init [float]')
-InitVendParser.add_argument('float', type=float)
-InitVendParser.set_defaults(func=init_vending_machine)
-
-if len(sys.argv) <= 1:
-    sys.argv.append('--help')
-
-args = parser.parse_args()
-args.func()
