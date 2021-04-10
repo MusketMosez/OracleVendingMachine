@@ -56,37 +56,60 @@ class CmdSubclass(Cmd):
             print("ValueError: Initialise vending machine with float value")
             print(usage)
 
-    def do_printfloat(self, arg):
+    def do_buy(self, arg):
+        if self.floatChange <= 0:
+            print('Insert more float change using the init command')
+        else:
+            try:
+                self.currentCost += float(arg)
+            except ValueError:
+                print('ValueError: Enter float value as cost of item')
+            else:
+                self.hasSelected = True
+
+    def do_deposit(self, arg):
+        if self.floatChange <= 0:
+            print('Insert more float change using the init command')
+        else:
+            if self.hasSelected is True and self.currentCost > 0.0:
+                try:
+                    self.paidAmount += float(arg)
+                except ValueError:
+                    print('ValueError: Deposit float value')
+                else:
+                    self.userCoins = parse_coins(self.paidAmount, self.userCoins)
+                    print('Current cost of selection: ' + "£{:,.2f}".format(self.currentCost))
+                    print('Deposited amount: ' + '£' + str(arg))
+                    difference = self.paidAmount - self.currentCost
+                    if difference < 0:
+                        print('Deposit more money, amount required: ' + "£{:,.2f}".format(difference * -1))
+                    else:
+                        print('Change due: ' + "£{:,.2f}".format(difference))
+                        self.floatChange -= difference
+                        self.changeDue = parse_coins(difference, self.changeDue)
+                        #print(self.changeDue)
+                        self.hasSelected = False
+            else:
+                print('Make a selection using buy command')
+
+    def do_getfloat(self, arg):
         """Command to print current vending machine float value\nUsage: pc"""
-        usage = 'Usage: pc'
+        usage = 'Usage: getfloat'
         if arg:
             print("Argument not required")
             print(usage)
-        print(self.floatChange)
+        print("£{:,.2f}".format(self.floatChange))
 
-    def do_buy(self, arg):
-        try:
-            self.currentCost += float(arg)
-        except ValueError:
-            print('ValueError: Enter float value as cost of item')
-        self.hasSelected = True
-
-    def do_deposit(self, arg):
-        if self.hasSelected is True and self.currentCost > 0.0:
-            self.paidAmount += float(arg)
-            self.userCoins = parse_coins(self.paidAmount, self.userCoins)
-            print('Current cost of selection: ' + '£' + str(self.currentCost))
-            print('Deposited amount: ' + '£' + str(arg))
-            difference = self.paidAmount - self.currentCost
-            if difference < 0:
-                print('Deposit more money, amount required: ' + str(round(difference, 2) * -1))
-            else:
-                print('Change due: ' + '£' + str(round(difference, 2)))
-                self.changeDue = parse_coins(difference, self.changeDue)
-                #print(self.changeDue)
-                self.hasSelected = False
-        else:
-            print('Make a selection using buy command')
+    def do_getchange(self,arg):
+        for key in self.changeDue.keys():
+            if self.changeDue[key] != 0:
+                if len(key) != 1:
+                    if key[2] != '0':
+                        print(key[2:] + 'p ' + 'X ' + str(int(self.changeDue[key])))
+                    else:
+                        print(key[3:] + 'p ' + 'X ' + str(int(self.changeDue[key])))
+                else:
+                    print('£' + key + ' X ' + str(int(self.changeDue[key])))
 
 
     def do_test(self, arg):
