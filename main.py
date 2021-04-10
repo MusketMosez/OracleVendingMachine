@@ -31,13 +31,7 @@ def parse_coins(coins, userCoins):
     userCoins['0.05'] += fives
     userCoins['0.01'] += pennies
 
-
-    print(fifties)
-    print(twenties)
-
-    print(userCoins)
     return userCoins
-
 
 
 class CmdSubclass(Cmd):
@@ -45,10 +39,11 @@ class CmdSubclass(Cmd):
     def __init__(self):
         self.floatChange = 0.0
         self.currentCost = 0.0
+        self.paidAmount = 0.0
         self.hasSelected = False
         self.hasPurchased = False
         self.userCoins = {'2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
-        self.changeDue = {}
+        self.changeDue = {'2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
         super(CmdSubclass, self).__init__()
 
     def do_init(self, arg):
@@ -69,19 +64,29 @@ class CmdSubclass(Cmd):
             print(usage)
         print(self.floatChange)
 
-    def do_cost(self, arg):
+    def do_buy(self, arg):
         try:
-            self.currentCost += arg
+            self.currentCost += float(arg)
         except ValueError:
             print('ValueError: Enter float value as cost of item')
         self.hasSelected = True
 
-    def do_buy(self, arg):
+    def do_deposit(self, arg):
         if self.hasSelected is True and self.currentCost > 0.0:
-            try:
-                self.userCoins = parse_coins(arg, self.userCoins)
-            except ValueError:
-                print("oh no")
+            self.paidAmount += float(arg)
+            self.userCoins = parse_coins(self.paidAmount, self.userCoins)
+            print('Current cost of selection: ' + '£' + str(self.currentCost))
+            print('Deposited amount: ' + '£' + str(arg))
+            difference = self.paidAmount - self.currentCost
+            if difference < 0:
+                print('Deposit more money, amount required: ' + str(round(difference, 2) * -1))
+            else:
+                print('Change due: ' + '£' + str(round(difference, 2)))
+                self.changeDue = parse_coins(difference, self.changeDue)
+                #print(self.changeDue)
+                self.hasSelected = False
+        else:
+            print('Make a selection using buy command')
 
 
     def do_test(self, arg):
