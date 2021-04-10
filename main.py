@@ -34,6 +34,18 @@ def parse_coins(coins, userCoins):
     return userCoins
 
 
+def print_coins(coins):
+    for key in coins.keys():
+        if coins[key] != 0:
+            if len(key) != 1:
+                if key[2] != '0':
+                    print(key[2:] + 'p ' + 'X ' + str(int(coins[key])))
+                else:
+                    print(key[3:] + 'p ' + 'X ' + str(int(coins[key])))
+            else:
+                print('£' + key + ' X ' + str(int(coins[key])))
+
+
 class CmdSubclass(Cmd):
 
     def __init__(self):
@@ -49,11 +61,13 @@ class CmdSubclass(Cmd):
     def do_init(self, arg):
         """ Command to initialise float amount for vending machine\n Usage: init [float]"""
         usage = 'Usage: init [float]'
-
         try:
             self.floatChange = float(arg)
+            if float(arg) < 0:
+                raise ValueError
+
         except ValueError:
-            print("ValueError: Initialise vending machine with float value")
+            print("ValueError: Initialise vending machine with positive float value")
             print(usage)
 
     def do_buy(self, arg):
@@ -62,8 +76,10 @@ class CmdSubclass(Cmd):
         else:
             try:
                 self.currentCost += float(arg)
+                if float(arg) < 0:
+                    raise ValueError
             except ValueError:
-                print('ValueError: Enter float value as cost of item')
+                print('ValueError: Enter positive float value as cost of item')
             else:
                 self.hasSelected = True
 
@@ -74,8 +90,10 @@ class CmdSubclass(Cmd):
             if self.hasSelected is True and self.currentCost > 0.0:
                 try:
                     self.paidAmount += float(arg)
+                    if float(arg) < 0:
+                        raise ValueError
                 except ValueError:
-                    print('ValueError: Deposit float value')
+                    print('ValueError: Deposit positive float value')
                 else:
                     self.userCoins = parse_coins(self.paidAmount, self.userCoins)
                     print('Current cost of selection: ' + "£{:,.2f}".format(self.currentCost))
@@ -87,7 +105,7 @@ class CmdSubclass(Cmd):
                         print('Change due: ' + "£{:,.2f}".format(difference))
                         self.floatChange -= difference
                         self.changeDue = parse_coins(difference, self.changeDue)
-                        #print(self.changeDue)
+                        self.paidAmount = 0.0
                         self.hasSelected = False
             else:
                 print('Make a selection using buy command')
@@ -101,6 +119,7 @@ class CmdSubclass(Cmd):
         print("£{:,.2f}".format(self.floatChange))
 
     def do_getchange(self,arg):
+
         for key in self.changeDue.keys():
             if self.changeDue[key] != 0:
                 if len(key) != 1:
@@ -110,6 +129,15 @@ class CmdSubclass(Cmd):
                         print(key[3:] + 'p ' + 'X ' + str(int(self.changeDue[key])))
                 else:
                     print('£' + key + ' X ' + str(int(self.changeDue[key])))
+
+    def do_getdeposit(self, arg):
+        print("£{:,.2f}".format(self.paidAmount))
+
+    def do_getdepositcoins(self, arg):
+
+
+    def do_getcost(self, arg):
+        print("£{:,.2f}".format(self.currentCost))
 
 
     def do_test(self, arg):
