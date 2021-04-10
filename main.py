@@ -95,9 +95,10 @@ class CmdSubclass(Cmd):
                 except ValueError:
                     print('ValueError: Deposit positive float value')
                 else:
-                    self.userCoins = parse_coins(self.paidAmount, self.userCoins)
+                    self.userCoins = parse_coins(float(arg), self.userCoins)
                     print('Current cost of selection: ' + "£{:,.2f}".format(self.currentCost))
                     print('Deposited amount: ' + '£' + str(arg))
+                    print('Total Deposit: ' + "£{:,.2f}".format(self.paidAmount))
                     difference = self.paidAmount - self.currentCost
                     if difference < 0:
                         print('Deposit more money, amount required: ' + "£{:,.2f}".format(difference * -1))
@@ -105,6 +106,8 @@ class CmdSubclass(Cmd):
                         print('Change due: ' + "£{:,.2f}".format(difference))
                         self.floatChange -= difference
                         self.changeDue = parse_coins(difference, self.changeDue)
+                        self.currentCost -= (self.paidAmount - difference)
+                        self.userCoins = dict.fromkeys(self.userCoins, 0)
                         self.paidAmount = 0.0
                         self.hasSelected = False
             else:
@@ -119,22 +122,13 @@ class CmdSubclass(Cmd):
         print("£{:,.2f}".format(self.floatChange))
 
     def do_getchange(self,arg):
-
-        for key in self.changeDue.keys():
-            if self.changeDue[key] != 0:
-                if len(key) != 1:
-                    if key[2] != '0':
-                        print(key[2:] + 'p ' + 'X ' + str(int(self.changeDue[key])))
-                    else:
-                        print(key[3:] + 'p ' + 'X ' + str(int(self.changeDue[key])))
-                else:
-                    print('£' + key + ' X ' + str(int(self.changeDue[key])))
+        print_coins(self.changeDue)
 
     def do_getdeposit(self, arg):
         print("£{:,.2f}".format(self.paidAmount))
 
     def do_getdepositcoins(self, arg):
-
+        print_coins(self.userCoins)
 
     def do_getcost(self, arg):
         print("£{:,.2f}".format(self.currentCost))
