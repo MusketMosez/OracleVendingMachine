@@ -58,13 +58,13 @@ def print_coins(coins):
 class CmdSubclass(Cmd):
 
     def __init__(self):
-        self.floatChange = 0.0
+        self.floatChange = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
         self.currentCost = 0.0
         self.paidAmount = 0.0
         self.hasSelected = False
         self.hasPurchased = False
-        self.userCoins = {'2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
-        self.changeDue = {'2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
+        self.userCoins = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
+        self.changeDue = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
         super(CmdSubclass, self).__init__()
 
     def do_init(self, arg):
