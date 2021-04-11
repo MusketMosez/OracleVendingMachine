@@ -17,6 +17,15 @@ def parse_coins(coins, userCoins):
         if pounds == 1:
             userCoins['1'] += 1
         else:
+            if pounds > 20:
+                userCoins['20'] += math.floor(pounds/20)
+                pounds -= (math.floor(pounds/20) * 20)
+            if 10 < pounds < 20:
+                userCoins['10'] += 1
+                pounds -= 10
+            if 5 < pounds < 10:
+                userCoins['10'] += 1
+                pounds -= 5
             if pounds % 2 == 0:
                 userCoins['2'] += pounds/2
             else:
@@ -45,39 +54,74 @@ def parse_coins(coins, userCoins):
 def print_coins(coins):
     for key in coins.keys():
         if coins[key] != 0:
-            if len(key) != 1:
+            if float(key) > 1:
+                print('£' + key + ' X ' + str(int(coins[key])))
+
+            else:
+
                 if key[2] != '0':
                     print(key[2:] + 'p ' + 'X ' + str(int(coins[key])))
                 else:
                     print(key[3:] + 'p ' + 'X ' + str(int(coins[key])))
-            else:
-                print('£' + key + ' X ' + str(int(coins[key])))
+
+ def sum_dict(change):
+
 
 
 # class contains call functions for API
 class CmdSubclass(Cmd):
 
     def __init__(self):
-        self.floatChange = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
+        self.floatChange = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0,
+                            '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
+
+        self.userCoins = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0,
+                          '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
+
+        self.changeDue = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0,
+                          '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
+
+        self.floatSum = 0.0
         self.currentCost = 0.0
         self.paidAmount = 0.0
         self.hasSelected = False
         self.hasPurchased = False
-        self.userCoins = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
-        self.changeDue = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0, '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
+
         super(CmdSubclass, self).__init__()
 
     def do_init(self, arg):
-        """ Command to initialise float amount for vending machine\n Usage: init [float]"""
+        """ Command to initialise float amount for vending machine\n Usage: init [float] {int}"""
         usage = 'Usage: init [float]'
+        allowed = [20.0, 10.0, 5.0, 2.0, 1.0, 0.5, 0.2, 0.1, 0.02, 0.01]
+        arg = arg.split(' ')
         try:
-            self.floatChange = float(arg)
-            if float(arg) < 0:
+            float(arg[0])
+            if float(arg[0]) < 0:
                 raise ValueError
-
+            #print(len(arg)
+            if float(arg[0]) not in allowed:
+                raise ValueError
         except ValueError:
-            print("ValueError: Initialise vending machine with positive float value")
-            print(usage)
+            print("ValueError: Initialise vending machine with legal tender as float and integer amount\n")
+            print(usage + '\n')
+            print('Accepted notes and coins:'
+                  '£20, £10, £5,'
+                  '£2, £1, 50p,'
+                  '20p, 10p, 5p, 2p, 1p')
+        else:
+            for key in self.floatChange.keys():
+                if float(str(key)) == float(arg[0]):
+                    if arg[1]:
+                        try:
+                            amount = int(arg[1])
+                        except ValueError:
+                            print("ValueError: Amount should be integer value")
+                        else:
+                            self.floatChange[key] += amount
+                    else:
+                        self.floatChange[key] += 1
+
+
 
     def do_buy(self, arg):
         """Command to purchase item for a specified price\n Usage: buy [float]"""
@@ -134,7 +178,7 @@ class CmdSubclass(Cmd):
         if arg:
             print("Argument not required")
             print(usage)
-        print("£{:,.2f}".format(self.floatChange))
+        print_coins(self.floatChange)
 
     def do_getchange(self,arg):
         """"Command to receive change due\nUsage: getchange"""
