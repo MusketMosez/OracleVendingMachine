@@ -145,7 +145,7 @@ class CmdSubclass(Cmd):
     def do_deposit(self, arg):
         """Command to purchase item for a specified price\n Usage: buy [float]"""
         usage = 'Usage: buy [float]'
-        if self.floatChange <= 0:
+        if self.floatSum <= 0:
             print('Insert more float change using the init command')
         else:
             if self.hasSelected is True and self.currentCost > 0.0:
@@ -166,12 +166,21 @@ class CmdSubclass(Cmd):
                         print('Deposit more money, amount required: ' + "£{:,.2f}".format(difference * -1))
                     else:
                         print('Change due: ' + "£{:,.2f}".format(difference))
-                        self.floatChange -= difference
-                        self.changeDue = parse_coins(difference, self.changeDue)
-                        self.currentCost -= (self.paidAmount - difference)
-                        self.userCoins = dict.fromkeys(self.userCoins, 0)
-                        self.paidAmount = 0.0
-                        self.hasSelected = False
+                        if difference > self.floatSum:
+                            print("Not enough float to provide change")
+                        else:
+
+                            self.currentCost -= (self.paidAmount - difference)
+                            self.changeDue = parse_coins(difference, self.changeDue)
+                            self.floatChange = {key: self.floatChange[key]-self.changeDue[key]
+                                                for key in self.floatChange}
+                            for key in self.floatChange:
+                                if self.floatChange[key] < 0:
+                                    print("Please enter more £{} to float to receive change".format(key))
+                                else:
+                                    self.userCoins = dict.fromkeys(self.userCoins, 0)
+                                    self.paidAmount = 0.0
+                                    self.hasSelected = False
             else:
                 print('Make a selection using buy command')
 
@@ -182,9 +191,9 @@ class CmdSubclass(Cmd):
             print("Argument not required")
             print(usage)
 
-        floatSum = sum_dict(self.floatChange)
+        self.floatSum = sum_dict(self.floatChange)
         print_coins(self.floatChange)
-        print('Total Float: ' + "£{:,.2f}".format(floatSum))
+        print('Total Float: ' + "£{:,.2f}".format(self.floatSum))
 
     def do_getchange(self,arg):
         """"Command to receive change due\nUsage: getchange"""
