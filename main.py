@@ -54,17 +54,20 @@ def parse_coins(coins, userCoins):
 def print_coins(coins):
     for key in coins.keys():
         if coins[key] != 0:
-            if float(key) > 1:
+            if float(key) >= 1:
                 print('£' + key + ' X ' + str(int(coins[key])))
-
             else:
-
                 if key[2] != '0':
                     print(key[2:] + 'p ' + 'X ' + str(int(coins[key])))
                 else:
                     print(key[3:] + 'p ' + 'X ' + str(int(coins[key])))
 
- def sum_dict(change):
+
+def sum_dict(change):
+    sum = 0
+    for key in change.keys():
+        sum += float(key) * change[key]
+    return sum
 
 
 
@@ -178,7 +181,10 @@ class CmdSubclass(Cmd):
         if arg:
             print("Argument not required")
             print(usage)
+
+        floatSum = sum_dict(self.floatChange)
         print_coins(self.floatChange)
+        print('Total Float: ' + "£{:,.2f}".format(floatSum))
 
     def do_getchange(self,arg):
         """"Command to receive change due\nUsage: getchange"""
