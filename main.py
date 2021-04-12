@@ -70,7 +70,6 @@ def sum_dict(change):
     return sum
 
 
-
 # class contains call functions for API
 class CmdSubclass(Cmd):
 
@@ -84,24 +83,26 @@ class CmdSubclass(Cmd):
         self.changeDue = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0,
                           '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
 
+        self.remChange = {}
+
         self.floatSum = 0.0
         self.currentCost = 0.0
         self.paidAmount = 0.0
         self.hasSelected = False
         self.hasPurchased = False
+        self.changePaid = True
 
         super(CmdSubclass, self).__init__()
 
     def do_init(self, arg):
         """ Command to initialise float amount for vending machine\n Usage: init [float] {int}"""
         usage = 'Usage: init [float]'
-        allowed = [20.0, 10.0, 5.0, 2.0, 1.0, 0.5, 0.2, 0.1, 0.02, 0.01]
+        allowed = [20.0, 10.0, 5.0, 2.0, 1.0, 0.5, 0.05, 0.2, 0.1, 0.02, 0.01]
         arg = arg.split(' ')
         try:
             float(arg[0])
             if float(arg[0]) < 0:
                 raise ValueError
-            #print(len(arg)
             if float(arg[0]) not in allowed:
                 raise ValueError
         except ValueError:
@@ -114,22 +115,43 @@ class CmdSubclass(Cmd):
         else:
             for key in self.floatChange.keys():
                 if float(str(key)) == float(arg[0]):
-                    if arg[1]:
+                    if len(arg) == 2:
+                        amount = arg[1]
                         try:
-                            amount = int(arg[1])
+                            amount = int(amount)
                         except ValueError:
                             print("ValueError: Amount should be integer value")
                         else:
                             self.floatChange[key] += amount
                     else:
                         self.floatChange[key] += 1
+                    if not self.changePaid:
+                        if key in self.remChange.keys():
+                            self.remChange[key] = self.floatChange[key]
 
 
+            if not self.changePaid:
+                isZero = False
+                for key in self.remChange:
+                    if self.remChange[key] < 0:
+                        isZero = True
+                        print("Add {} more £{} to receive change".format(str(-1 * int(self.remChange[key])), str(key)))
+                if not isZero:
+                    self.do_getchange('')
+                    self.changePaid = True
+
+    def do_fastinit(self,arg):
+        """Command to initialise float with default set of notes and coins\nUsage: fastinit"""
+        usage = 'Usage: fastinit'
+        self.floatChange = {'20': 5, '10': 5, '5': 5, '2': 5, '1': 5, '0.50': 5,
+                            '0.20': 5, '0.10': 5, '0.05': 5, '0.01': 5}
+        self.floatSum = sum_dict(self.floatChange)
 
     def do_buy(self, arg):
         """Command to purchase item for a specified price\n Usage: buy [float]"""
         usage = 'Usage: buy [float]'
-        if self.floatChange <= 0:
+        self.floatSum = sum_dict(self.floatChange)
+        if self.floatSum <= 0:
             print('Insert more float change using the init command')
         else:
             try:
@@ -145,8 +167,9 @@ class CmdSubclass(Cmd):
     def do_deposit(self, arg):
         """Command to purchase item for a specified price\n Usage: buy [float]"""
         usage = 'Usage: buy [float]'
+        self.floatSum = sum_dict(self.floatChange)
         if self.floatSum <= 0:
-            print('Insert more float change using the init command')
+            print('No float cast in machine, insert more float change using the init command')
         else:
             if self.hasSelected is True and self.currentCost > 0.0:
                 try:
@@ -176,6 +199,9 @@ class CmdSubclass(Cmd):
                                                 for key in self.floatChange}
                             for key in self.floatChange:
                                 if self.floatChange[key] < 0:
+                                    self.remChange[key] = self.floatChange[key]
+                                    # print(self.floatChange[key])
+                                    self.changePaid = False
                                     print("Please enter more £{} to float to receive change".format(key))
                                 else:
                                     self.userCoins = dict.fromkeys(self.userCoins, 0)
@@ -201,7 +227,9 @@ class CmdSubclass(Cmd):
         if arg:
             print("Argument not required")
             print(usage)
+        print('Change due: ' + "£{:,.2f}".format(self.changeDue))
         print_coins(self.changeDue)
+        self.changeDue = dict.fromkeys(self.changeDue, 0)
 
     def do_getdeposit(self, arg):
         """Command to receive the total amount currently\ndeposited by user with option to recieve amount in change format\nUsage: getdeposit {change} """
