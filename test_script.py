@@ -41,7 +41,8 @@ class MyTestCase(unittest.TestCase):
         c = main.CmdSubclass()
         c.do_init('0.5 3')
         c.floatSum = main.sum_dict(c.floatChange)
-        actual = c.do_getfloat('')
+        c.do_getfloat('')
+        actual = c.floatSumStr
         expected = 'Total Float: ' + "£1.50"
         self.assertEqual(actual, expected)
 
@@ -50,7 +51,8 @@ class MyTestCase(unittest.TestCase):
         c.do_fastinit('')
         c.do_buy('0.55')
         c.do_deposit('0.65')
-        actual = c.do_getchange('')
+        c.do_getchange('')
+        actual = c.changeDueSumStr
         expected = 'Change due: ' + "£0.10"
         self.assertEqual(actual, expected)
 

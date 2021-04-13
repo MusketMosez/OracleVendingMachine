@@ -85,6 +85,9 @@ class CmdSubclass(Cmd):
         self.changeDue = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0,
                           '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
 
+        self.floatSumStr = " "
+        self.changeDueSumStr = " "
+
         # stores change yet to be paid if float is negative
         self.remChange = {}
 
@@ -238,9 +241,8 @@ class CmdSubclass(Cmd):
 
         self.floatSum = sum_dict(self.floatChange)
         print_coins(self.floatChange)
-        floatSumStr = 'Total Float: ' + "£{:,.2f}".format(self.floatSum)
-        print(floatSumStr)
-        return floatSumStr
+        self.floatSumStr = 'Total Float: ' + "£{:,.2f}".format(self.floatSum)
+        print(self.floatSumStr)
 
     def do_getchange(self,arg):
         """"Command to receive change due\nUsage: getchange"""
@@ -249,12 +251,11 @@ class CmdSubclass(Cmd):
             print("Argument not required")
             print(usage)
 
-        changeDueSumStr = 'Change due: ' + "£{:,.2f}".format(self.changeDueSum)
-        print(changeDueSumStr)
+        self.changeDueSumStr = 'Change due: ' + "£{:,.2f}".format(self.changeDueSum)
+        print(self.changeDueSumStr)
         print_coins(self.changeDue)
         self.changeDue = dict.fromkeys(self.changeDue, 0)
         self.changeDueSum = 0.0
-        return changeDueSumStr
 
     def do_getdeposit(self, arg):
         """Command to receive the total amount currently\ndeposited by user with option to recieve amount in change format\nUsage: getdeposit {change} """
