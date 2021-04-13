@@ -20,13 +20,13 @@ def parse_coins(coins, userCoins):
         if pounds == 1:
             userCoins['1'] += 1
         else:
-            if pounds > 20:
+            if pounds >= 20:
                 userCoins['20'] += math.floor(pounds/20)
                 pounds -= (math.floor(pounds/20) * 20)
-            if 10 < pounds < 20:
+            if 10 <= pounds < 20:
                 userCoins['10'] += 1
                 pounds -= 10
-            if 5 < pounds < 10:
+            if 5 <= pounds < 10:
                 userCoins['10'] += 1
                 pounds -= 5
             if pounds % 2 == 0:
@@ -91,6 +91,7 @@ class CmdSubclass(Cmd):
         self.floatSum = 0.0
         self.currentCost = 0.0
         self.paidAmount = 0.0
+        self.changeDueSum = 0.0
 
         self.hasSelected = False
         self.changePaid = True
@@ -145,7 +146,7 @@ class CmdSubclass(Cmd):
                     self.do_getchange('')
                     self.changePaid = True
 
-    def do_fastinit(self,arg):
+    def do_fastinit(self, arg):
         """Command to initialise float with default set of notes and coins\nUsage: fastinit"""
         usage = 'Usage: fastinit'
         self.floatChange = {'20': 5, '10': 5, '5': 5, '2': 5, '1': 5, '0.50': 5,
@@ -209,6 +210,7 @@ class CmdSubclass(Cmd):
 
                             self.currentCost -= (self.paidAmount - difference)
                             self.changeDue = parse_coins(difference, self.changeDue)
+                            self.changeDueSum = difference
 
                             # subtract change paid to user from float
                             self.floatChange = {key: self.floatChange[key]-self.changeDue[key]
@@ -236,7 +238,9 @@ class CmdSubclass(Cmd):
 
         self.floatSum = sum_dict(self.floatChange)
         print_coins(self.floatChange)
-        print('Total Float: ' + "£{:,.2f}".format(self.floatSum))
+        floatSumStr = 'Total Float: ' + "£{:,.2f}".format(self.floatSum)
+        print(floatSumStr)
+        return floatSumStr
 
     def do_getchange(self,arg):
         """"Command to receive change due\nUsage: getchange"""
@@ -244,9 +248,13 @@ class CmdSubclass(Cmd):
         if arg:
             print("Argument not required")
             print(usage)
-        print('Change due: ' + "£{:,.2f}".format(self.changeDue))
+
+        changeDueSumStr = 'Change due: ' + "£{:,.2f}".format(self.changeDueSum)
+        print(changeDueSumStr)
         print_coins(self.changeDue)
         self.changeDue = dict.fromkeys(self.changeDue, 0)
+        self.changeDueSum = 0.0
+        return changeDueSumStr
 
     def do_getdeposit(self, arg):
         """Command to receive the total amount currently\ndeposited by user with option to recieve amount in change format\nUsage: getdeposit {change} """
