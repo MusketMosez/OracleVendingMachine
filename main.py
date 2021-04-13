@@ -99,8 +99,8 @@ class CmdSubclass(Cmd):
         super(CmdSubclass, self).__init__()
 
     def do_init(self, arg):
-        """ Command to initialise float amount for vending machine\n Usage: init [float] {int}"""
-        usage = 'Usage: init [float]'
+        """ Command to initialise float amount for vending machine\n Usage: init [pound] {amount}"""
+        usage = 'Usage: init [pound] {amount}'
         allowed = [20.0, 10.0, 5.0, 2.0, 1.0, 0.5, 0.05, 0.2, 0.1, 0.02, 0.01]
         arg = arg.split(' ')
         try:
