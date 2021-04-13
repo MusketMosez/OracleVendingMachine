@@ -1,18 +1,21 @@
-import math
+
+# cmd library allows functionality of CLI (Command Line Interface)
 from cmd import Cmd
+
 import sys
+import math
 
 
 # helper functions
 
-# changes sum of money into change
+# separates sum of money into change
 def parse_coins(coins, userCoins):
 
     # separate pounds from change
     pounds = math.floor(coins)
     smallChange = coins - pounds
 
-    # add the number of £1 and £2 coins to dictionary
+    # add the number of notes and pound coins to dictionary
     if pounds != 0:
         if pounds == 1:
             userCoins['1'] += 1
@@ -31,8 +34,6 @@ def parse_coins(coins, userCoins):
             else:
                 userCoins['1'] += 1
                 userCoins['2'] += (pounds - 1) / 2
-
-
 
     # add the number of 50p, 20p, 10p, 5p and 1p to dictionary
     fifties, smallChange = divmod(smallChange, 0.50)
@@ -64,16 +65,17 @@ def print_coins(coins):
 
 
 def sum_dict(change):
-    sum = 0
+    totalSum = 0
     for key in change.keys():
-        sum += float(key) * change[key]
-    return sum
+        totalSum += float(key) * change[key]
+    return totalSum
 
 
 # class contains call functions for API
 class CmdSubclass(Cmd):
 
     def __init__(self):
+        # dictionaries to store amounts of change
         self.floatChange = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0,
                             '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
 
@@ -83,13 +85,14 @@ class CmdSubclass(Cmd):
         self.changeDue = {'20': 0, '10': 0, '5': 0, '2': 0, '1': 0, '0.50': 0,
                           '0.20': 0, '0.10': 0, '0.05': 0, '0.01': 0}
 
+        # stores change yet to be paid if float is negative
         self.remChange = {}
 
         self.floatSum = 0.0
         self.currentCost = 0.0
         self.paidAmount = 0.0
+
         self.hasSelected = False
-        self.hasPurchased = False
         self.changePaid = True
 
         super(CmdSubclass, self).__init__()
@@ -100,6 +103,7 @@ class CmdSubclass(Cmd):
         allowed = [20.0, 10.0, 5.0, 2.0, 1.0, 0.5, 0.05, 0.2, 0.1, 0.02, 0.01]
         arg = arg.split(' ')
         try:
+            # check legal tender
             float(arg[0])
             if float(arg[0]) < 0:
                 raise ValueError
@@ -113,6 +117,7 @@ class CmdSubclass(Cmd):
                   '£2, £1, 50p,'
                   '20p, 10p, 5p, 2p, 1p')
         else:
+            # add input to corresponding key in float dictionary
             for key in self.floatChange.keys():
                 if float(str(key)) == float(arg[0]):
                     if len(arg) == 2:
@@ -129,7 +134,7 @@ class CmdSubclass(Cmd):
                         if key in self.remChange.keys():
                             self.remChange[key] = self.floatChange[key]
 
-
+            # if remaining change is satisfied by float input, change due is paid to user
             if not self.changePaid:
                 isZero = False
                 for key in self.remChange:
@@ -148,13 +153,15 @@ class CmdSubclass(Cmd):
         self.floatSum = sum_dict(self.floatChange)
 
     def do_buy(self, arg):
-        """Command to purchase item for a specified price\n Usage: buy [float]"""
-        usage = 'Usage: buy [float]'
+        """Command to purchase item for a price specified by user\n Usage: buy [price]"""
+        usage = 'Usage: buy [price]'
         self.floatSum = sum_dict(self.floatChange)
+        # check if float available
         if self.floatSum <= 0:
             print('Insert more float change using the init command')
         else:
             try:
+                # check input is valid price
                 self.currentCost += float(arg)
                 if float(arg) < 0:
                     raise ValueError
@@ -162,17 +169,21 @@ class CmdSubclass(Cmd):
                 print('ValueError: Enter positive float value as cost of item')
                 print(usage)
             else:
+                # tells system a purchase has been made
                 self.hasSelected = True
 
     def do_deposit(self, arg):
-        """Command to purchase item for a specified price\n Usage: buy [float]"""
-        usage = 'Usage: buy [float]'
+        """Command to deposit money to purchase selected item\n Usage: deposit [amount]"""
+        usage = 'Usage: deposit [amount]'
         self.floatSum = sum_dict(self.floatChange)
+        # check if float available
         if self.floatSum <= 0:
             print('No float cast in machine, insert more float change using the init command')
         else:
+            # check if item has been selected
             if self.hasSelected is True and self.currentCost > 0.0:
                 try:
+                    # track total amount deposited by user
                     self.paidAmount += float(arg)
                     if float(arg) < 0:
                         raise ValueError
@@ -180,27 +191,33 @@ class CmdSubclass(Cmd):
                     print('ValueError: Deposit positive float value')
                     print(usage)
                 else:
+                    # track deposited amount by user as change
                     self.userCoins = parse_coins(float(arg), self.userCoins)
+
                     print('Current cost of selection: ' + "£{:,.2f}".format(self.currentCost))
                     print('Deposited amount: ' + '£' + str(arg))
                     print('Total Deposit: ' + "£{:,.2f}".format(self.paidAmount))
                     difference = self.paidAmount - self.currentCost
+
                     if difference < 0:
                         print('Deposit more money, amount required: ' + "£{:,.2f}".format(difference * -1))
                     else:
                         print('Change due: ' + "£{:,.2f}".format(difference))
                         if difference > self.floatSum:
-                            print("Not enough float to provide change")
+                            print("Not enough float to provide change, enter more float using init command")
                         else:
 
                             self.currentCost -= (self.paidAmount - difference)
                             self.changeDue = parse_coins(difference, self.changeDue)
+
+                            # subtract change paid to user from float
                             self.floatChange = {key: self.floatChange[key]-self.changeDue[key]
                                                 for key in self.floatChange}
+
+                            # if not enough float of specific note/coin, add note/coin to change to be paid
                             for key in self.floatChange:
                                 if self.floatChange[key] < 0:
                                     self.remChange[key] = self.floatChange[key]
-                                    # print(self.floatChange[key])
                                     self.changePaid = False
                                     print("Please enter more £{} to float to receive change".format(key))
                                 else:
@@ -250,15 +267,11 @@ class CmdSubclass(Cmd):
             print(usage)
         print("£{:,.2f}".format(self.currentCost))
 
-    def do_test(self, arg):
-        print(type(arg.split(' ')))
-
     def do_exit(*args):
         return -1
 
 
 if __name__ == '__main__':
-
     c = CmdSubclass()
     command = ' '.join(sys.argv[1:])
     if command:
