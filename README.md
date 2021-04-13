@@ -94,6 +94,10 @@ Vending Machine written in Python
 
 - If the user is due change after purchasing an item this amount can be attained using the `getchange` command
 
+#### Exit program
+
+- The `exit` command may be used to exit the shell and return to the command line
+
 ### Testing
 
 - To run set of unit tests, execute the test script inside the directory folder
@@ -118,4 +122,8 @@ Vending Machine written in Python
 - Make commands clearer/more concise e.g. get float  instead of getfloat
 
 - Print outputs of change in nicer format using tables
+
+- Provide 'quick buy' command where the `buy` and `deposit` commands are executed in one line
+
+- Provide a more 'interactive' test suite either through more class methods or adapt the unit tests
 
